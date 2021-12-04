@@ -283,12 +283,5 @@ for i in arquivo:
 if __name__ == '__main__':
     sin = Sintatico()
     agrupa(token_geral)
-    # print(token_geral)
     exibe_imprime("token_saida", token_geral)
-    # print(token_geral)
     sin.conector(token_geral, tabela_token)
-    # print("Erros ", exibe_imprime("lista_erros", lista_erros))
-    # lista_erros = []
-    # print("Tabela", tabela_token)
-    imprime_tabela(tabela_token)
-    # print("Comentário:", acumula)
