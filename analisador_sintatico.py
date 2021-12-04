@@ -20,7 +20,7 @@ class Sintatico(object):
         self.lista = []
         self.tabela = []
         self.tabela_declaracao = {}
-        self.elemento = ["NUM", "ID", "LIT",
+        self.elemento = ["NUM", "ID", "LIT", "RES",
                          "int", "float", "char", "while", "if"]
         self.tipo = ["int", "float", "char"]
         self.pos_global = -1
@@ -155,10 +155,14 @@ class Sintatico(object):
             print("Linha: " + self.consulta_tabela(pos)[0])
         return pos
 
-    def verica_declarado(self, simb):
+    def verica_declarado(self, simb, pos):
         """Verifica se o simbolo já foi declarado"""
-        if(simb not in self.elemento):
-            simb = self.consulta_tabela(simb)[1]
+        print('ELEMENTOS =>', self.elemento)
+        print('TABELA DECLARACAO =>', self.tabela_declaracao)
+        if(simb in self.elemento):
+            print('SIMBOLO =>', simb)
+            print('CONSULTA TABELA NO VERIFICA DECLARADO =>', self.consulta_tabela(pos)[1])
+            simb = self.consulta_tabela(pos)[1]
         if(simb not in self.tabela_declaracao):
             print("Símbolo não declarado: " + simb)
             #self.erro("Símbolo Não declarado", simb,)
@@ -166,10 +170,20 @@ class Sintatico(object):
         else:
             return 1
 
-    def retorna_registrador(self, pos):
+    def retorna_registrador(self, pos, simb):
         """Retorna o registrador"""
-        if(self.verica_declarado(pos) == 1):
-            return self.tabela_declaracao[self.consulta_tabela(pos)[1]][2]
+        if(self.verica_declarado(simb, pos) == 1):
+            print('RETORNA REGISTRADOR =>', self.tabela_declaracao[self.consulta_tabela(pos)[1]][1][1])
+            return self.tabela_declaracao[self.consulta_tabela(pos)[1]][1][1]
+    
+    def retorna_valor_declarado(self, pos, simb):
+        # TODO: Retornar o valor da correto da declaração -> agora está voltando sempre o primeiro
+        """Retorna o valor declarado"""
+        if(self.verica_declarado(simb, pos) == 1):
+            for palavras in self.lista:
+                if(simb in palavras):
+                    return palavras[1]
+        return ''
 
     def compara_tipo(self, tipo_a, tipo_b):
         """ Compara os tipos"""
@@ -200,32 +214,31 @@ class Sintatico(object):
 
     def gera_codigo(self, opcao, pos, retorno_geracao):
         """Realiza a geração de código de C para Python"""
+        print('opcao', opcao)
         arquivo = open("geracao", "a")
         self.cont += 1
-        registrador = "$S" + str(self.cont)
-        if(opcao == "+" or opcao == "-" or opcao == "*" or
-             opcao == "/" or opcao == ">" or opcao == "<"):
-            simb = self.retorna_registrador(pos - 2)
-            simb2 = self.retorna_registrador(pos)
-            tipo_retorno = self.verifica_tipos(pos - 2, pos)
-            retorno_geracao = opcao + " " + registrador + \
-                "," + str(simb) + "," + str(simb2)
-            print(retorno_geracao)
+        if(opcao == 'ID'):
+            simb = self.retorna_registrador(pos, opcao)
+            valor = self.retorna_valor_declarado(pos, 'NUM')
+            retorno_geracao = simb + ' ' + '=' + ' ' + valor
             arquivo.write(retorno_geracao)
             arquivo.write('\n')
-            return retorno_geracao, tipo_retorno
+            return retorno_geracao
         arquivo.close()
 
     def programa(self):
         """Função programa"""
-        # self.pos_global -= 1
+        print('posicao global =>', self.pos_global)
         simb, pos = self.get_next_token(self.tokens, self.pos_global)
-        # print "First PROG ", simb
+        print("Primeiro símbolo da linha =>", simb)
+        print("Posicao do Primeiro símbolo da linha =>", pos)
+
         if(simb == "$"):
             """Final da leitura"""
             return self.valido(pos)
         elif(simb in self.tipo):
-            """Válida uma declaração"""
+            print('É um símbolo valido =>', simb)
+            """Valida uma declaração"""
             pos = self.declaracao(pos)
             simb = self.tokens[pos]
             if(simb not in " $ "):
@@ -345,16 +358,20 @@ class Sintatico(object):
     def declaracao(self, pos):
         """Verifica a declaracao"""
         simb = self.tokens[pos]
+        print('simbolo na declaracao =>', simb)
         if(simb in self.tipo):
             """Verifica se simbolo é int, float ou char."""
             tipo = simb
+            # pega o próximo simbolo depois do int, float, char
             simb, pos = self.get_next_token(self.tokens, pos)
-            # print simb
+            print('Simbolo depois do tipo =>', simb)
+
+            # se o simbolo for um identificador
             if(simb in "ID"):
                 # print self.tokens[pos - 1], self.lista[pos][1],
                 # self.consulta_tabela(pos)
                 self.adiciona_tabela(pos, tipo)
-                self.gera_codigo("Load", pos, None)
+                self.gera_codigo(simb, pos, None)
                 simb, pos = self.get_next_token(self.tokens, pos)
 
                 if(simb == ";"):
@@ -410,10 +427,9 @@ class Sintatico(object):
 
     def conector(self, lista, tabela):
         """Realiza a ponte de conexão entre o Analisador Léxico e o Sintático"""
-        # print("Entrada Sintático "), lista
-        # print(lista)
-        self.lista = lista
-        self.tabela = tabela
+        print("Entrada Sintático: Token Geral =>", lista)
+        self.lista = lista # lista é o token geral
+        self.tabela = tabela # tabela é a tabela de simbolos
         cont = 0
         for i in lista:
             cont = cont + 1
@@ -424,7 +440,7 @@ class Sintatico(object):
             else:
                 self.tokens.append(i[0])
         self.tokens.append("$")
-        print("Entrada Sintático: "), self.tokens
+        print("Lista de tokens existentes no código =>", self.tokens)
         self.programa()
         if(self.indica_erro == 0 and self.warning == 0):
             print("Retorno sem erros")
