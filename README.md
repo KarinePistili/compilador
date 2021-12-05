@@ -177,8 +177,8 @@ Condição -> if(E op E){B};|if(E op E){B}else{B};|if(E op E){B}else{B}elseif(E 
 Bloco -> S|$
 ```
 
-|   |   |   |   |   |
-|---|---|---|---|---|
+|   |   |
+|---|---|
 |First (S) = First (D) = FIRST T =  {int, float, char}  | Follow (S) = { $}|
 |First A = { id, int}   | Follow A = {if, $}  |
 |First R = {while, for, $}   | Follow D = {if, $}|   
