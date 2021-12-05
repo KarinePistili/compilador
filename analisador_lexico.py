@@ -55,7 +55,6 @@ tabela_token = {}
 # Caso não encontre gera '[Token Inválido]'
 def verifica_lexico(elemento, token_geral, lista_erros, linha, coluna):
     """Se apresentar erro retorna 1 e se for bem sucessido retorna 0"""
-    # token_invalido = 0
     separ_oper = separadores + operadores
     if not re.match("[\w]", elemento):
         if elemento not in separ_oper:
@@ -79,7 +78,6 @@ def aux_agrupa(elemento, i, lista, cont, elemento_double, next_elemento):
 def agrupa(lista):
     """Agrupa os elementos na lista"""
     cont = 0
-    # print(lista)
     for i in lista:
         aux_agrupa("+", i, lista, cont, "++", "+")
         aux_agrupa("-", i, lista, cont, "--", "-")

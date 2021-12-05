@@ -89,7 +89,6 @@ class Sintatico(object):
             simb, pos = self.get_next_token(lista, pos)
             retorno_geracao, tipo_retorno = self.gera_codigo("+", pos, None)
             self.T(simb, lista, pos), retorno_geracao, tipo_retorno
-            # Elinha(simb, lista, pos)
         elif (simb == ")" or simb == ";"):
             print("Expressão válida")
             return pos
@@ -135,7 +134,6 @@ class Sintatico(object):
 
     def consulta_tabela(self, posicao):
         """Retorna o elemento"""
-        # print "Pos", posicao
         if(posicao >= len(self.lista)):
             posicao -= 1
         for i in range(posicao, -1, -1):
@@ -165,7 +163,7 @@ class Sintatico(object):
             simb = self.consulta_tabela(pos)[1]
         if(simb not in self.tabela_declaracao):
             print("Símbolo não declarado: " + simb)
-            #self.erro("Símbolo Não declarado", simb,)
+            self.erro("Símbolo Não declarado", simb,)
             return -1
         else:
             return 1
@@ -292,25 +290,6 @@ class Sintatico(object):
             self.erro(simb, pos)
             return pos
 
-    def declaracao_virgula(self, pos, tipo):
-        """Válida declaração multipla"""
-        simb, pos = self.get_next_token(self.tokens, pos)
-        self.adiciona_tabela(pos, tipo)
-        if("ID" in simb):
-            self.gera_codigo("Load", pos, None) # a = 5
-            simb, pos = self.get_next_token(self.tokens, pos)
-            self.warning_inicializado(pos)
-            if("," in simb):
-                self.declaracao_virgula(pos)
-            elif(";" in simb):
-                return pos
-            else:
-                self.erro(simb, pos)
-                return pos
-        else:
-            self.erro(simb, pos)
-            return pos
-
     def atribuicao(self, pos):
         """Válida uma atribuicao"""
         simb = self.tokens[pos]
@@ -323,7 +302,7 @@ class Sintatico(object):
                 try:
                     pos, retorno_geracao, tipo_retorno = self.E(
                         simb, self.tokens, pos)
-                    self.gera_codigo("Store", pos_geracao, retorno_geracao) # a = b
+                    self.gera_codigo(simb, pos_geracao, retorno_geracao) # a = b
                     self.verifica_tipos(tipo_retorno, pos_geracao)
                 except Exception as e:
                     pos = self.E(simb, self.tokens, pos)
@@ -345,7 +324,6 @@ class Sintatico(object):
 
     def adiciona_tabela(self, pos, tipo):
         """Verifica se o elemento já esta na tabela"""
-        # print self.lista[pos], self.lista
         simb = self.lista[pos][1]
         linha = self.consulta_tabela(pos)
         if(simb in self.tabela_declaracao):
@@ -368,8 +346,6 @@ class Sintatico(object):
 
             # se o simbolo for um identificador
             if(simb in "ID"):
-                # print self.tokens[pos - 1], self.lista[pos][1],
-                # self.consulta_tabela(pos)
                 self.adiciona_tabela(pos, tipo)
                 self.gera_codigo(simb, pos, None)
                 simb, pos = self.get_next_token(self.tokens, pos)
@@ -378,11 +354,8 @@ class Sintatico(object):
                     print("Declaração Válida.")
                     self.warning_inicializado(pos)
                     return pos
-                elif("," in simb):
-                    return self.declaracao_virgula(pos, tipo)
                 else:
                     pos -= 1
-                    # print pos
                     valor = self.atribuicao(pos)
                     if(valor == None):
                         self.indica_erro = 1
@@ -392,7 +365,6 @@ class Sintatico(object):
     def repeticao(self, pos):
         """Define a estrutura de repeticao"""
         simb = self.tokens[pos]
-        # print "while"
         print(simb)
         if(simb in "while"):
             self.gera_codigo("return", pos, None)
@@ -418,8 +390,6 @@ class Sintatico(object):
                 else:
                     print("Bloco")
                     self.gera_codigo("return", pos, None)
-                    # print "erro"
-                    ##self.erro(simb, pos)
 
     def bloco(self):
         """Bloco de programa"""
