@@ -6,6 +6,8 @@ O caso que será utilizado como exemplo é o Algoritmo de Luhn, que serve para a
 
 Este algoritmo verifica se um número de cartão é bem formado realizando operações matemáticas simples. Note que passar no teste de Luhn quer simplesmente dizer que não ocorreram erros, ou seja, o número é bem formado.
 
+Vídeo contendo a apresentação do projeto: [https://youtu.be/gwoM0jdAnME](https://youtu.be/gwoM0jdAnME)
+
 ## Integrantes
 
 * Bruno Rocha - 161046
